@@ -2,15 +2,15 @@
 
 A skill for turning a short source clip into a timestamped cinematic multi-camera prompt, then reviewing the generated interpretation against the source.
 
-This is a prompt/workflow skill, not a video generator or a promise of frame-perfect synchronization. The supplied template targets Seedance 2.5. Its evidence gathering, motion tracking, continuity planning and review methods can inform other video workflows, but provider-specific prompts and limits must be adapted and checked.
+This is a prompt/workflow skill, not a video generator or a promise of frame-perfect synchronization. The working skill accepts fixed CCTV, iPhone/phone video, other handheld footage, archival film and edited references. It defaults to **Seedance 2.5 at 480p** for cinematic video generation, while keeping analysis and continuity methods backend-independent. Explicit user choices override defaults; provider-specific parameters and limits must be checked before each run.
 
 ## What's included
 
-- [`SKILL.md`](SKILL.md) — the working skill, with one added instruction to read the execution notes.
+- [`SKILL.md`](SKILL.md) — the adapted working skill, with explicit generation defaults, broad source support and a link to the execution notes.
 - [`references/CCTVCUT.original.md`](references/CCTVCUT.original.md) — the supplied original, preserved unchanged.
 - [`references/LOCAL_EXECUTION.md`](references/LOCAL_EXECUTION.md) — execution and accuracy qualifications, kept separate from the original template.
 
-No source footage, generated media, private account data, credentials or paid-generation configuration is included.
+No source footage, generated media, private account data, credentials or account-specific billing configuration is included. The model/resolution defaults describe a preference, not permission to spend.
 
 ## Workflow
 
@@ -23,6 +23,12 @@ No source footage, generated media, private account data, credentials or paid-ge
 7. Assemble an AI-labelled comparison without stretching either source's aspect ratio.
 
 Sound can be handled separately using the finished cinematic edit as the sound clock. Preserve the approved picture and choose an appropriate video-to-audio or editing backend for each run; this repository does not bundle or require a sound-generation service.
+
+## Sound-design rules
+
+The original AUDIO block remains unchanged: diegetic sound only; action sounds on their beats; background sounds on their scheduled timings; quiet lulls, the peak and aftermath; no music, spoken words, narration or transition effects. Wordless vocal reactions are permitted when supported by the clip. These are sound-design constraints, not a guarantee that a generator will obey them. A silent source has no recoverable original sound; invented sound must not be represented as recorded evidence.
+
+The original assembly default uses audio from the AI panel. A silent-output request takes priority. A separate sound pass is optional and must use the finished cinematic edit's actual timings without replacing the approved picture. The Seedance 2.5/480p video default does not force all sound work through Seedance.
 
 ## Use with an assistant
 
@@ -38,7 +44,7 @@ Installing this skill does not authorize spending, uploading private footage, or
 
 ## Customizations in this copy
 
-The working `SKILL.md` differs from the preserved original only by an instruction to read `references/LOCAL_EXECUTION.md`. Those notes add:
+The preserved original remains unchanged. The working skill now explicitly defaults to Seedance 2.5 at 480p, allows model/resolution overrides, accepts moving phone and archival references, and removes unconditional fixed-security-camera wording. It also links to `references/LOCAL_EXECUTION.md`, whose qualifications include:
 
 - Honest source identification and separation of evidence from creative interpretation.
 - Real measurements and generation review rather than assumed exact synchronization.
