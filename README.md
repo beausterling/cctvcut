@@ -1,34 +1,69 @@
-# CCTVCUT
+# CCTVCUT — source video to cinema
 
-A skill for turning a short source clip into a timestamped cinematic multi-camera prompt, then reviewing the generated interpretation against the source.
+Turn CCTV, iPhone/phone recordings, handheld footage, archival film or another reference video into cinematic multi-camera coverage of the same visible moment.
 
-This is a prompt/workflow skill, not a video generator or a promise of frame-perfect synchronization. The working skill accepts fixed CCTV, iPhone/phone video, other handheld footage, archival film and edited references. It defaults to **Seedance 2.5 at 480p** for cinematic video generation, while keeping analysis and continuity methods backend-independent. Explicit user choices override defaults; provider-specific parameters and limits must be checked before each run.
+This repository contains **two separate skills**. Both produce prompts and instructions; neither submits paid generations by default.
 
-## What's included
+| Skill | Input | Output | Default handoff |
+|---|---|---|---|
+| [Cinematic skill](SKILL.md) | Original source/reference video | Timed cinematic prompt and review/assembly instructions | Seedance **2.5 / 480p**, unless overridden |
+| [GenHQ Sound](skills/genhq-sound/SKILL.md), optional | The **newly generated cinematic video** | One detailed standalone sound-design prompt | Prompt + silent cinematic video → Seedance **2.0 / 480p**, audio enabled |
 
-- [`SKILL.md`](SKILL.md) — the adapted working skill, with explicit generation defaults, broad source support and a link to the execution notes.
-- [`references/CCTVCUT.original.md`](references/CCTVCUT.original.md) — the supplied original, preserved unchanged.
-- [`references/LOCAL_EXECUTION.md`](references/LOCAL_EXECUTION.md) — execution and accuracy qualifications, kept separate from the original template.
+Model/resolution defaults can be overridden. Check the chosen provider's current prompt, reference, mode and duration limits before submitting; a default is not a guarantee that every frontend supports a particular request.
 
-No source footage, generated media, private account data, credentials or account-specific billing configuration is included. The model/resolution defaults describe a preference, not permission to spend.
+## The entire workflow
 
-## Workflow
+### 1. Produce the cinematic video
 
-1. Inspect the actual video and identify its source type honestly. Handheld footage is not fixed CCTV.
-2. Separate visible evidence, measurements, external reporting and uncertainty.
-3. Build the beat timeline, cast, geography, entry routes and motion/continuity map.
-4. Write the timestamped cinematic camera sequence and a concise operational prompt.
-5. Obtain any required approval before uploads, paid generation or publication.
-6. Compare generated actions and cuts against the source. Report drift rather than claiming synchronization from the prompt alone.
-7. Assemble an AI-labelled comparison without stretching either source's aspect ratio.
+Give the main skill a reference clip. It inspects the evidence, maps timing/geography/identity and prepares cinematic coverage. Generate the first video using your chosen provider, review it, and keep the original cinematic file as the visual master. Source type is described honestly; moving phone footage is not treated as a static security camera.
 
-Sound can be handled separately using the finished cinematic edit as the sound clock. Preserve the approved picture and choose an appropriate video-to-audio or editing backend for each run; this repository does not bundle or require a sound-generation service.
+An AI-over-source split-screen comparison is optional. Label the AI interpretation and preserve both sources' aspect ratios.
 
-## Sound-design rules
+### 2. Optionally run GenHQ Sound on that new video
 
-The original AUDIO block remains unchanged: diegetic sound only; action sounds on their beats; background sounds on their scheduled timings; quiet lulls, the peak and aftermath; no music, spoken words, narration or transition effects. Wordless vocal reactions are permitted when supported by the clip. These are sound-design constraints, not a guarantee that a generator will obey them. A silent source has no recoverable original sound; invented sound must not be represented as recorded evidence.
+Load [`skills/genhq-sound/SKILL.md`](skills/genhq-sound/SKILL.md). It analyzes the **actual finished cinematic video**, not the original phone/CCTV clip or the planned storyboard. It measures the shot/event timing, inspects visible contacts/materials and returns **one detailed, copyable English prompt**, a compact event map and uncertainties.
 
-The original assembly default uses audio from the AI panel. A silent-output request takes priority. A separate sound pass is optional and must use the finished cinematic edit's actual timings without replacing the approved picture. The Seedance 2.5/480p video default does not force all sound work through Seedance.
+The user can take that prompt to any tool. Prompt creation alone does not upload footage, generate audio, call a paid API or spend credits.
+
+### 3. Default sound pass: Seedance 2.0 at 480p
+
+Keep the original cinematic master. If it has audio, create a separate silent copy for the sound pass:
+
+```sh
+ffmpeg -i cinematic-original.mp4 -map 0:v:0 -c:v copy -an cinematic-silent.mp4
+```
+
+Submit **the GenHQ sound prompt and that silent cinematic video** to Seedance **2.0**, request **480p**, and turn **audio generation on**. Use the measured cinematic runtime and preserve its timing/cuts in the prompt. The user controls submission and can choose another model or service.
+
+If the selected frontend rejects the length, references or settings, report that limitation instead of silently shortening, splitting or retiming the film or switching to a costlier model. A prompt's timing instructions are targets, not proof of generated synchronization.
+
+### 4. Put the returned audio onto the original cinematic picture
+
+Download the returned sound-pass video. Its 480p image is only an **audio carrier**. Extract its new audio and attach it to the **original cinematic video from step 1**—not to the original reference clip, and not to the low-resolution carrier picture.
+
+A local helper performs that assembly without network or model calls:
+
+```sh
+python3 skills/genhq-sound/scripts/attach_audio.py \
+  --original cinematic-original.mp4 \
+  --carrier seedance-sound-carrier.mp4 \
+  --output cinematic-with-sound.mp4
+```
+
+It produces:
+- `cinematic-with-sound.mp4` — original video packets with the new audio, replacing any prior audio;
+- `cinematic-with-sound.audio.mka` — unmodified encoded carrier-audio archive;
+- `cinematic-with-sound.manifest.json` — duration, audio and packet-hash checks.
+
+The helper copies rather than re-encodes the picture and verifies its packet hash. Delivery audio is AAC-encoded; no added sounds, mastering, stretching, looping or padding is applied. Existing files are not overwritten. Materially short audio or a start offset stops assembly for review rather than hiding drift. Technical checks do not certify Foley realism; listen to the result.
+
+That is the default path. There is no automatic model tournament, library-search stage or separate multi-stem production pipeline.
+
+## Sound-design intent
+
+By default, sound is diegetic: environmental air/ambience, bodies/props and supported visible events on the finished film's actual timing. Preserve relative quiet and acoustic distance. No unrequested score, narration, intelligible words or artificial transition hits. A camera cut is not an impact, and small material movements do not automatically justify loud crunches. Explicit user intent overrides genre-template conventions.
+
+The main skill's original AUDIO block is preserved. GenHQ Sound expands the post-video prompt-writing step, without claiming generated sound is recovered original evidence or guaranteed frame-perfect Foley.
 
 ## Use with an assistant
 
@@ -36,27 +71,38 @@ The original assembly default uses audio from the AI panel. A silent-output requ
 git clone https://github.com/beausterling/cctvcut.git
 ```
 
-Give your assistant `SKILL.md` and the `references/` directory, along with a source video. For a file-based skill loader, copy those files together into a `cctvcut` skill directory. Keep the relative directory structure intact.
+Load the main [`SKILL.md`](SKILL.md) and its `references/` alongside the source video. For the optional second step, separately load [`skills/genhq-sound/SKILL.md`](skills/genhq-sound/SKILL.md) with its own `references/` and `scripts/` directory.
 
-Common per-user skill locations include `~/.claude/skills/cctvcut/`, `~/.codex/skills/cctvcut/` and `~/.hermes/skills/cctvcut/`; use the location supported by your installed assistant. The analysis examples require tools such as FFmpeg/ffprobe or Python with OpenCV. Access to a video-generation provider is separate.
+For file-based skill loaders, copy the root `SKILL.md` plus root `references/` into a `cctvcut` skill folder, and copy the entire `skills/genhq-sound/` directory into a separate `genhq-sound` skill folder. Use the skill location supported by your assistant. No API key is needed for analysis/prompt preparation or local assembly.
 
-Installing this skill does not authorize spending, uploading private footage, or publishing. Provider limits, content rules, model availability and prices must be checked before each run.
+### Local tools
 
-## Customizations in this copy
+- FFmpeg and ffprobe for video inspection, silent copies and final assembly.
+- Python 3.9+ for the assembly helper and tests.
+- NumPy for the supplied GenHQ beat analyzer only. Install in an isolated environment if needed:
 
-The preserved original remains unchanged. The working skill now explicitly defaults to Seedance 2.5 at 480p, allows model/resolution overrides, accepts moving phone and archival references, and removes unconditional fixed-security-camera wording. It also links to `references/LOCAL_EXECUTION.md`, whose qualifications include:
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r skills/genhq-sound/requirements.txt
+.venv/bin/python skills/genhq-sound/scripts/analyze.py cinematic-original.mp4
+```
 
-- Honest source identification and separation of evidence from creative interpretation.
-- Real measurements and generation review rather than assumed exact synchronization.
-- Provider-specific prompt, duration and reference-limit checks; no silent retiming or truncation.
-- Aspect-ratio-safe split-screen assembly and respect for silent-output requests.
-- No invented identities, outcomes, smoke chemistry or supposedly recovered sound.
-- Respect for provider safeguards and explicit approval boundaries.
+The analyzer's cuts/motion peaks are candidates, not semantic proof of contacts. View the frames before writing the sound prompt.
 
-Some notes record a particular provider's documented behavior as an execution example. They are not permanent model guarantees; recheck current first-party documentation.
+### Offline verification
+
+```sh
+python3 -m unittest discover -s tests -v
+```
+
+The assembly tests use short synthetic FFmpeg fixtures, never a model or paid API. They check picture preservation, extracted-audio integrity, missing audio, short audio, input validation and overwrite protection. They do not test a generative model's audio quality.
 
 ## Provenance and rights
 
-The original template was supplied by the repository owner; its upstream author and redistribution license were not established. It is retained as a separate reference so the source and local additions can be distinguished. No new MIT, Apache or other broad license is asserted over the supplied material. A public copy alone does not grant rights beyond those held by the relevant rights holders.
+- [`references/CCTVCUT.original.md`](references/CCTVCUT.original.md) preserves the supplied cinematic template unchanged.
+- [`references/LOCAL_EXECUTION.md`](references/LOCAL_EXECUTION.md) contains source/evidence, provider-limit and aspect-ratio qualifications for the working cinematic skill.
+- [`skills/genhq-sound/references/genhq-original.md`](skills/genhq-sound/references/genhq-original.md) preserves the supplied GenHQ sound template. Its working adaptation is the optional prompt-first skill above.
 
-Use only footage and other assets you have permission to process and share. Label generated interpretations clearly, and do not present generated picture or sound as authenticated documentation of an event.
+The supplied templates' upstream authorship and redistribution licenses were not established. No new MIT, Apache or other blanket license is asserted over those materials; a public copy does not grant additional rights beyond those held by the relevant rights holders.
+
+No project footage, generated media, private transcripts, account data, credentials or billing configuration is included. Installing a skill does not authorize spending, private uploads or publication. Use assets you have permission to process/share and label AI interpretations clearly.

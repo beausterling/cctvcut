@@ -36,6 +36,16 @@ The viewer must be able to match every action on top to the same action below, s
 
 ---
 
+# OPTIONAL POST-VIDEO SOUND
+
+After the cinematic video has been generated, optionally use the separate **genhq-sound** skill on that newly generated cinematic edit. Its default output is one detailed sound-design prompt, not a paid generation. Analyze the actual cinematic picture and its timings, not the original reference or planned shot list.
+
+Default user handoff: **sound prompt + silent cinematic video → Seedance 2.0 at 480p, audio enabled**. When the user supplies the completed carrier and requests assembly, extract its new audio and attach it to the **original cinematic video from this skill**, preserving that original picture rather than using the carrier's 480p visuals. The user may instead use the prompt with any chosen tool.
+
+Keep the original cinematic master. Generate silently or make a separate silent upload copy when this optional sound path is selected. Loading either skill does not authorize API submission, uploads or spending. The first cinematic-generation default above remains Seedance 2.5/480p; Seedance 2.0/480p is the optional sound-pass default. Check the selected provider's current length/reference limits rather than silently trimming, splitting or retiming the film.
+
+---
+
 # PRIORITY ORDER
 
 If rules compete, follow this order:

@@ -17,3 +17,5 @@ node_modules/
 *.m4a
 *.aiff
 *.flac
+*.mka
+*.pcm
