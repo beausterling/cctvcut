@@ -30,7 +30,8 @@ The viewer must be able to match every action on top to the same action below, s
 - **Default generation resolution: 480p.** This is the cost-conscious starting setting for cinematic video generation, not a claim that every provider or mode supports it.
 - User-specified models, resolutions and workflow requirements override these defaults. Keep the evidence analysis, timing, geography and continuity method independent of the generation backend; adapt only the provider-facing prompt, reference format and request parameters.
 - Before a run, verify the selected provider supports the requested model, 480p/mode combination, duration, aspect ratio and input references. If not, report the limitation and obtain approval for a material change; never silently switch to a more expensive resolution or model.
-- Set duration from the actual selected reference and its timestamps. Do not hardcode a demonstration clip's duration, frame rate or aspect ratio.
+- **Seedance duration buffer (Beau's standing rule):** probe the selected source duration S. For S < 30 seconds, request at least S + 1 seconds of generation; if the provider accepts only whole seconds, use ceil(S + 1), not merely ceil(S). Examples: 7 → 8 seconds; 14.5667 → 16 seconds; 29 → 30 seconds. For an exactly 30-second source paired with a 30-second generation, request 30 seconds with NO extra second. Never request 31 seconds from a 30-second-limited provider. If 29 < S < 30 and the full extra second would exceed that limit, trim the selected original to 29 seconds and request 30 seconds; record the source trim. The user permits trimming the original when needed for assembly. Verify the provider's actual limit before submission; do not silently change model or resolution to obtain the buffer.
+- Keep source-event checkpoints at their original timestamps: the extra generation time is an editorial buffer, not permission to stretch, slow or delay the action. Preserve the untrimmed generated master; choose and trim the matching interval for assembly, trimming the original when needed and documenting any trims. Extra duration does not guarantee synchronization. Do not hardcode a demonstration clip's duration, frame rate or aspect ratio.
 - A 480p generation default is not an instruction to downsample the original reference or an already-approved higher-resolution master. Preserve original assets and approved picture, especially when adding sound later.
 - These are video-generation defaults, not a mandatory sound-design backend. Optional separate sound passes remain adaptable; no generation, upload or spend is authorized merely by loading this skill.
 
@@ -66,7 +67,7 @@ Never trade sync or geography for a cooler shot.
 
 ## This IS
 - a cinematic sequence the viewer can check against the real footage beneath it
-- one generation, as long as the source clip (up to 30 s), with 8–20 hard-cut shots
+- one generation with the Seedance duration buffer above (source + at least 1 second below 30 seconds; exactly 30 → 30 with no buffer), with 8–20 hard-cut shots; the assembled comparison uses matching trimmed intervals
 - ground-level, physical, feature-film grade, diegetic sound only
 
 ## This is NOT
@@ -197,7 +198,7 @@ Pick devices that exist in this location:
 
 The final prompt is plain English with no markdown links, URLs or names. Adapt its length and syntax to the selected provider. The original 12–21k-character director brief is optional supporting material, not a universal submission length; use a concise operational prompt within verified provider limits.
 
-1. **Header:** `PHOTOREALISTIC LIVE-ACTION CINEMATIC SEQUENCE. Horizontal 16:9. [N] seconds, 00:00.0 to 00:[N].0. [K] hard-cut shots…` Add a genre tone that fits the clip (thriller, comedy, heartwarming, sports, nature). Add one line saying every shot is a different camera idea and every operator is physically inside the location.
+1. **Header:** `PHOTOREALISTIC LIVE-ACTION CINEMATIC SEQUENCE. Horizontal 16:9. [N] seconds, 00:00.0 to 00:[N].0. [K] hard-cut shots…` N is the buffered generation duration, not automatically the source duration. State the source-matched interval separately and reserve the extra time as natural editorial coverage without delaying source actions. For an exactly 30-second source/generation pair, N=30 and there is no extra second. Add a genre tone that fits the clip (thriller, comedy, heartwarming, sports, nature). Add one line saying every shot is a different camera idea and every operator is physically inside the location.
 2. **SCENE CONTEXT:** place type, time of day, weather, the cause, the whole moment in about 5 sentences, whose film it is, and how it ends.
 3. **REFERENCE CONTROL:**
    - Describe the reference honestly: "The attached reference is a [fixed security-camera / handheld phone / archival film / edited source] recording of this sequence." Select only a supported description; use "source video" if uncertain. Never mislabel footage to evade provider safeguards.
@@ -299,7 +300,7 @@ Reply in the user's language. The prompt is always in English.
 2. **Sync map:** a compact table of second → source action → AI shot.
 3. **The full prompt** in one copyable code block.
 4. **Assembly sheet**, in 5 lines:
-   - generate with the muted source clip as Video 1, at the same length
+   - generate with the muted source clip as Video 1; below 30 seconds request at least source duration + 1 second (ceil(source + 1) for integer-only requests), with exactly 30 → 30 as the no-extra-second exception; apply the documented near-limit source trim when needed
    - vertical 1080×1920 layout: AI panel on top (1080×608), a thin black gap, source below (1080×608), black header and footer; both panels start on frame one
    - audio from the AI panel
    - an optional end title from the case facts
